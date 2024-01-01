@@ -95,17 +95,17 @@ local H = {}
 ---
 ---@usage `require('mini.completion').setup({})` (replace `{}` with your `config` table)
 MiniPairs.setup = function(config)
-  -- Export module
-  _G.MiniPairs = MiniPairs
+	-- Export module
+	_G.MiniPairs = MiniPairs
 
-  -- Setup config
-  config = H.setup_config(config)
+	-- Setup config
+	config = H.setup_config(config)
 
-  -- Apply config
-  H.apply_config(config)
+	-- Apply config
+	H.apply_config(config)
 
-  -- Define behavior
-  H.create_autocommands()
+	-- Define behavior
+	H.create_autocommands()
 end
 
 --- Module config
@@ -113,30 +113,33 @@ end
 --- Default values:
 ---@eval return MiniDoc.afterlines_to_code(MiniDoc.current.eval_section)
 MiniPairs.config = {
-  -- In which modes mappings from this `config` should be created
-  modes = { insert = true, command = false, terminal = false },
+	-- In which modes mappings from this `config` should be created
+	modes = { insert = true, command = false, terminal = false },
 
-  -- Global mappings. Each right hand side should be a pair information, a
-  -- table with at least these fields (see more in |MiniPairs.map|):
-  -- - <action> - one of "open", "close", "closeopen".
-  -- - <pair> - two character string for pair to be used.
-  -- By default pair is not inserted after `\`, quotes are not recognized by
-  -- `<CR>`, `'` does not insert pair after a letter.
-  -- Only parts of tables can be tweaked (others will use these defaults).
-  -- Supply `false` instead of table to not map particular key.
-  mappings = {
-    ['('] = { action = 'open', pair = '()', neigh_pattern = '[^\\].' },
-    ['['] = { action = 'open', pair = '[]', neigh_pattern = '[^\\].' },
-    ['{'] = { action = 'open', pair = '{}', neigh_pattern = '[^\\].' },
+	-- Global mappings. Each right hand side should be a pair information, a
+	-- table with at least these fields (see more in |MiniPairs.map|):
+	-- - <action> - one of "open", "close", "closeopen".
+	-- - <pair> - two character string for pair to be used.
+	-- By default pair is not inserted after `\`, quotes are not recognized by
+	-- `<CR>`, `'` does not insert pair after a letter.
+	-- Only parts of tables can be tweaked (others will use these defaults).
+	-- Supply `false` instead of table to not map particular key.
+	mappings = {
+		["("] = { action = "open", pair = "()", neigh_pattern = "[^\\]." },
+		["["] = { action = "open", pair = "[]", neigh_pattern = "[^\\]." },
+		["{"] = { action = "open", pair = "{}", neigh_pattern = "[^\\]." },
 
-    [')'] = { action = 'close', pair = '()', neigh_pattern = '[^\\].' },
-    [']'] = { action = 'close', pair = '[]', neigh_pattern = '[^\\].' },
-    ['}'] = { action = 'close', pair = '{}', neigh_pattern = '[^\\].' },
+		["<"] = { action = "open", pair = "<>", neigh_pattern = "[^\\]." },
+		[">"] = { action = "close", pair = "<>", neigh_pattern = "[^\\]." },
 
-    ['"'] = { action = 'closeopen', pair = '""', neigh_pattern = '[^\\].', register = { cr = false } },
-    ["'"] = { action = 'closeopen', pair = "''", neigh_pattern = '[^%a\\].', register = { cr = false } },
-    ['`'] = { action = 'closeopen', pair = '``', neigh_pattern = '[^\\].', register = { cr = false } },
-  },
+		[")"] = { action = "close", pair = "()", neigh_pattern = "[^\\]." },
+		["]"] = { action = "close", pair = "[]", neigh_pattern = "[^\\]." },
+		["}"] = { action = "close", pair = "{}", neigh_pattern = "[^\\]." },
+
+		['"'] = { action = "closeopen", pair = '""', neigh_pattern = "[^\\].", register = { cr = false } },
+		["'"] = { action = "closeopen", pair = "''", neigh_pattern = "[^%a\\].", register = { cr = false } },
+		["`"] = { action = "closeopen", pair = "``", neigh_pattern = "[^\\].", register = { cr = false } },
+	},
 }
 --minidoc_afterlines_end
 
@@ -166,15 +169,15 @@ MiniPairs.config = {
 ---@param opts table|nil Optional table `opts` for |nvim_set_keymap()|. Elements
 ---   `expr` and `noremap` won't be recognized (`true` by default).
 MiniPairs.map = function(mode, lhs, pair_info, opts)
-  pair_info = H.validate_pair_info(pair_info)
-  opts = vim.tbl_deep_extend('force', opts or {}, { expr = true, noremap = true })
-  opts.desc = H.infer_mapping_description(pair_info)
+	pair_info = H.validate_pair_info(pair_info)
+	opts = vim.tbl_deep_extend("force", opts or {}, { expr = true, noremap = true })
+	opts.desc = H.infer_mapping_description(pair_info)
 
-  vim.api.nvim_set_keymap(mode, lhs, H.pair_info_to_map_rhs(pair_info), opts)
-  H.register_pair(pair_info, mode, 'all')
+	vim.api.nvim_set_keymap(mode, lhs, H.pair_info_to_map_rhs(pair_info), opts)
+	H.register_pair(pair_info, mode, "all")
 
-  -- Ensure that `<BS>` and `<CR>` are mapped for input mode
-  H.ensure_cr_bs(mode)
+	-- Ensure that `<BS>` and `<CR>` are mapped for input mode
+	H.ensure_cr_bs(mode)
 end
 
 --- Make buffer mapping
@@ -194,15 +197,15 @@ end
 ---@param opts table|nil Optional table `opts` for |nvim_buf_set_keymap()|.
 ---   Elements `expr` and `noremap` won't be recognized (`true` by default).
 MiniPairs.map_buf = function(buffer, mode, lhs, pair_info, opts)
-  pair_info = H.validate_pair_info(pair_info)
-  opts = vim.tbl_deep_extend('force', opts or {}, { expr = true, noremap = true })
-  opts.desc = H.infer_mapping_description(pair_info)
+	pair_info = H.validate_pair_info(pair_info)
+	opts = vim.tbl_deep_extend("force", opts or {}, { expr = true, noremap = true })
+	opts.desc = H.infer_mapping_description(pair_info)
 
-  vim.api.nvim_buf_set_keymap(buffer, mode, lhs, H.pair_info_to_map_rhs(pair_info), opts)
-  H.register_pair(pair_info, mode, buffer == 0 and vim.api.nvim_get_current_buf() or buffer)
+	vim.api.nvim_buf_set_keymap(buffer, mode, lhs, H.pair_info_to_map_rhs(pair_info), opts)
+	H.register_pair(pair_info, mode, buffer == 0 and vim.api.nvim_get_current_buf() or buffer)
 
-  -- Ensure that `<BS>` and `<CR>` are mapped for input mode
-  H.ensure_cr_bs(mode)
+	-- Ensure that `<BS>` and `<CR>` are mapped for input mode
+	H.ensure_cr_bs(mode)
 end
 
 --- Remove global mapping
@@ -213,13 +216,15 @@ end
 ---@param lhs string `lhs` for |nvim_del_keymap()|.
 ---@param pair __pairs_unregistered_pair
 MiniPairs.unmap = function(mode, lhs, pair)
-  -- `pair` should be supplied explicitly
-  vim.validate({ pair = { pair, 'string' } })
+	-- `pair` should be supplied explicitly
+	vim.validate({ pair = { pair, "string" } })
 
-  -- Use `pcall` to allow 'deleting' already deleted mapping
-  pcall(vim.api.nvim_del_keymap, mode, lhs)
-  if pair == '' then return end
-  H.unregister_pair(pair, mode, 'all')
+	-- Use `pcall` to allow 'deleting' already deleted mapping
+	pcall(vim.api.nvim_del_keymap, mode, lhs)
+	if pair == "" then
+		return
+	end
+	H.unregister_pair(pair, mode, "all")
 end
 
 --- Remove buffer mapping
@@ -236,13 +241,15 @@ end
 ---@param lhs string `lhs` for |nvim_buf_del_keymap()|.
 ---@param pair __pairs_unregistered_pair
 MiniPairs.unmap_buf = function(buffer, mode, lhs, pair)
-  -- `pair` should be supplied explicitly
-  vim.validate({ pair = { pair, 'string' } })
+	-- `pair` should be supplied explicitly
+	vim.validate({ pair = { pair, "string" } })
 
-  -- Use `pcall` to allow 'deleting' already deleted mapping
-  pcall(vim.api.nvim_buf_del_keymap, buffer, mode, lhs)
-  if pair == '' then return end
-  H.unregister_pair(pair, mode, buffer == 0 and vim.api.nvim_get_current_buf() or buffer)
+	-- Use `pcall` to allow 'deleting' already deleted mapping
+	pcall(vim.api.nvim_buf_del_keymap, buffer, mode, lhs)
+	if pair == "" then
+		return
+	end
+	H.unregister_pair(pair, mode, buffer == 0 and vim.api.nvim_get_current_buf() or buffer)
 end
 
 --- Process "open" symbols
@@ -259,9 +266,11 @@ end
 ---
 ---@return string Keys performing "open" action.
 MiniPairs.open = function(pair, neigh_pattern)
-  if H.is_disabled() or not H.neigh_match(neigh_pattern) then return pair:sub(1, 1) end
+	if H.is_disabled() or not H.neigh_match(neigh_pattern) then
+		return pair:sub(1, 1)
+	end
 
-  return ('%s%s'):format(pair, H.get_arrow_key('left'))
+	return ("%s%s"):format(pair, H.get_arrow_key("left"))
 end
 
 --- Process "close" symbols
@@ -279,14 +288,16 @@ end
 ---
 ---@return string Keys performing "close" action.
 MiniPairs.close = function(pair, neigh_pattern)
-  if H.is_disabled() or not H.neigh_match(neigh_pattern) then return pair:sub(2, 2) end
+	if H.is_disabled() or not H.neigh_match(neigh_pattern) then
+		return pair:sub(2, 2)
+	end
 
-  local close = pair:sub(2, 2)
-  if H.get_cursor_neigh(1, 1) == close then
-    return H.get_arrow_key('right')
-  else
-    return close
-  end
+	local close = pair:sub(2, 2)
+	if H.get_cursor_neigh(1, 1) == close then
+		return H.get_arrow_key("right")
+	else
+		return close
+	end
 end
 
 --- Process "closeopen" symbols
@@ -303,11 +314,11 @@ end
 ---
 ---@return string Keys performing "closeopen" action.
 MiniPairs.closeopen = function(pair, neigh_pattern)
-  if H.is_disabled() or H.get_cursor_neigh(1, 1) ~= pair:sub(2, 2) then
-    return MiniPairs.open(pair, neigh_pattern)
-  else
-    return H.get_arrow_key('right')
-  end
+	if H.is_disabled() or H.get_cursor_neigh(1, 1) ~= pair:sub(2, 2) then
+		return MiniPairs.open(pair, neigh_pattern)
+	else
+		return H.get_arrow_key("right")
+	end
 end
 
 --- Process |<BS>|
@@ -335,14 +346,14 @@ end
 ---
 ---@return string Keys performing "backspace" action.
 MiniPairs.bs = function(key)
-  local res = key or H.keys.bs
+	local res = key or H.keys.bs
 
-  local neigh = H.get_cursor_neigh(0, 1)
-  if not H.is_disabled() and H.is_pair_registered(neigh, vim.fn.mode(), 0, 'bs') then
-    res = ('%s%s'):format(res, H.keys.del)
-  end
+	local neigh = H.get_cursor_neigh(0, 1)
+	if not H.is_disabled() and H.is_pair_registered(neigh, vim.fn.mode(), 0, "bs") then
+		res = ("%s%s"):format(res, H.keys.del)
+	end
 
-  return res
+	return res
 end
 
 --- Process |i_<CR>|
@@ -359,14 +370,14 @@ end
 ---
 ---@return string Keys performing "new line" action.
 MiniPairs.cr = function(key)
-  local res = key or H.keys.cr
+	local res = key or H.keys.cr
 
-  local neigh = H.get_cursor_neigh(0, 1)
-  if not H.is_disabled() and H.is_pair_registered(neigh, vim.fn.mode(), 0, 'cr') then
-    res = ('%s%s'):format(res, H.keys.above)
-  end
+	local neigh = H.get_cursor_neigh(0, 1)
+	if not H.is_disabled() and H.is_pair_registered(neigh, vim.fn.mode(), 0, "cr") then
+		res = ("%s%s"):format(res, H.keys.above)
+	end
 
-  return res
+	return res
 end
 
 -- Helper data ================================================================
@@ -374,14 +385,14 @@ end
 H.default_config = vim.deepcopy(MiniPairs.config)
 
 -- Default value of `pair_info` for mapping functions
-H.default_pair_info = { neigh_pattern = '..', register = { bs = true, cr = true } }
+H.default_pair_info = { neigh_pattern = "..", register = { bs = true, cr = true } }
 
 -- Pair sets registered *per mode-buffer-key*. Buffer `'all'` contains pairs
 -- registered for all buffers.
 H.registered_pairs = {
-  i = { all = { bs = {}, cr = {} } },
-  c = { all = { bs = {}, cr = {} } },
-  t = { all = { bs = {}, cr = {} } },
+	i = { all = { bs = {}, cr = {} } },
+	c = { all = { bs = {}, cr = {} } },
+	t = { all = { bs = {}, cr = {} } },
 }
 
 -- Precomputed keys to increase speed
@@ -402,213 +413,237 @@ H.keys = {
 -- Helper functionality =======================================================
 -- Settings -------------------------------------------------------------------
 H.setup_config = function(config)
-  -- General idea: if some table elements are not present in user-supplied
-  -- `config`, take them from default config
-  vim.validate({ config = { config, 'table', true } })
-  config = vim.tbl_deep_extend('force', vim.deepcopy(H.default_config), config or {})
+	-- General idea: if some table elements are not present in user-supplied
+	-- `config`, take them from default config
+	vim.validate({ config = { config, "table", true } })
+	config = vim.tbl_deep_extend("force", vim.deepcopy(H.default_config), config or {})
 
-  -- Validate per nesting level to produce correct error message
-  vim.validate({
-    modes = { config.modes, 'table' },
-    mappings = { config.mappings, 'table' },
-  })
+	-- Validate per nesting level to produce correct error message
+	vim.validate({
+		modes = { config.modes, "table" },
+		mappings = { config.mappings, "table" },
+	})
 
-  vim.validate({
-    ['modes.insert'] = { config.modes.insert, 'boolean' },
-    ['modes.command'] = { config.modes.command, 'boolean' },
-    ['modes.terminal'] = { config.modes.terminal, 'boolean' },
-  })
+	vim.validate({
+		["modes.insert"] = { config.modes.insert, "boolean" },
+		["modes.command"] = { config.modes.command, "boolean" },
+		["modes.terminal"] = { config.modes.terminal, "boolean" },
+	})
 
-  local validate_mapping = function(pair_info, prefix)
-    -- Allow `false` to not create mapping
-    if pair_info == false then return end
-    H.validate_pair_info(pair_info, prefix)
-  end
+	local validate_mapping = function(pair_info, prefix)
+		-- Allow `false` to not create mapping
+		if pair_info == false then
+			return
+		end
+		H.validate_pair_info(pair_info, prefix)
+	end
 
-  validate_mapping(config.mappings['('], "mappings['(']")
-  validate_mapping(config.mappings['['], "mappings['[']")
-  validate_mapping(config.mappings['{'], "mappings['{']")
-  validate_mapping(config.mappings[')'], "mappings[')']")
-  validate_mapping(config.mappings[']'], "mappings[']']")
-  validate_mapping(config.mappings['}'], "mappings['}']")
-  validate_mapping(config.mappings['"'], "mappings['\"']")
-  validate_mapping(config.mappings["'"], 'mappings["\'"]')
-  validate_mapping(config.mappings['`'], "mappings['`']")
+	validate_mapping(config.mappings["("], "mappings['(']")
+	validate_mapping(config.mappings["["], "mappings['[']")
+	validate_mapping(config.mappings["{"], "mappings['{']")
+	validate_mapping(config.mappings[")"], "mappings[')']")
+	validate_mapping(config.mappings["]"], "mappings[']']")
+	validate_mapping(config.mappings["}"], "mappings['}']")
+	validate_mapping(config.mappings['"'], "mappings['\"']")
+	validate_mapping(config.mappings["'"], 'mappings["\'"]')
+	validate_mapping(config.mappings["`"], "mappings['`']")
 
-  return config
+	return config
 end
 
 H.apply_config = function(config)
-  MiniPairs.config = config
+	MiniPairs.config = config
 
-  -- Setup mappings in supplied modes
-  local mode_ids = { insert = 'i', command = 'c', terminal = 't' }
-  -- Compute in which modes mapping should be set up
-  local mode_array = {}
-  for name, to_set in pairs(config.modes) do
-    if to_set then table.insert(mode_array, mode_ids[name]) end
-  end
+	-- Setup mappings in supplied modes
+	local mode_ids = { insert = "i", command = "c", terminal = "t" }
+	-- Compute in which modes mapping should be set up
+	local mode_array = {}
+	for name, to_set in pairs(config.modes) do
+		if to_set then
+			table.insert(mode_array, mode_ids[name])
+		end
+	end
 
-  local map_conditionally = function(mode, key, pair_info)
-    -- Allow `false` to not create mapping
-    if pair_info == false then return end
+	local map_conditionally = function(mode, key, pair_info)
+		-- Allow `false` to not create mapping
+		if pair_info == false then
+			return
+		end
 
-    -- This also should take care of mapping `<BS>` and `<CR>`
-    MiniPairs.map(mode, key, pair_info)
-  end
+		-- This also should take care of mapping `<BS>` and `<CR>`
+		MiniPairs.map(mode, key, pair_info)
+	end
 
-  for _, mode in pairs(mode_array) do
-    for key, pair_info in pairs(config.mappings) do
-      map_conditionally(mode, key, pair_info)
-    end
-  end
+	for _, mode in pairs(mode_array) do
+		for key, pair_info in pairs(config.mappings) do
+			map_conditionally(mode, key, pair_info)
+		end
+	end
 end
 
 H.create_autocommands = function()
-  local augroup = vim.api.nvim_create_augroup('MiniPairs', {})
+	local augroup = vim.api.nvim_create_augroup("MiniPairs", {})
 
-  local au = function(event, pattern, callback, desc)
-    vim.api.nvim_create_autocmd(event, { group = augroup, pattern = pattern, callback = callback, desc = desc })
-  end
+	local au = function(event, pattern, callback, desc)
+		vim.api.nvim_create_autocmd(event, { group = augroup, pattern = pattern, callback = callback, desc = desc })
+	end
 
-  au('FileType', { 'TelescopePrompt', 'fzf' }, function() vim.b.minipairs_disable = true end, 'Disable locally')
+	au("FileType", { "TelescopePrompt", "fzf" }, function()
+		vim.b.minipairs_disable = true
+	end, "Disable locally")
 end
 
-H.is_disabled = function() return vim.g.minipairs_disable == true or vim.b.minipairs_disable == true end
+H.is_disabled = function()
+	return vim.g.minipairs_disable == true or vim.b.minipairs_disable == true
+end
 
 -- Pair registration ----------------------------------------------------------
 H.register_pair = function(pair_info, mode, buffer)
-  -- Process new mode
-  H.registered_pairs[mode] = H.registered_pairs[mode] or { all = { bs = {}, cr = {} } }
-  local mode_pairs = H.registered_pairs[mode]
+	-- Process new mode
+	H.registered_pairs[mode] = H.registered_pairs[mode] or { all = { bs = {}, cr = {} } }
+	local mode_pairs = H.registered_pairs[mode]
 
-  -- Process new buffer
-  mode_pairs[buffer] = mode_pairs[buffer] or { bs = {}, cr = {} }
+	-- Process new buffer
+	mode_pairs[buffer] = mode_pairs[buffer] or { bs = {}, cr = {} }
 
-  -- Register pair if it is not already registered
-  local register, pair = pair_info.register, pair_info.pair
-  if register.bs and not vim.tbl_contains(mode_pairs[buffer].bs, pair) then
-    table.insert(mode_pairs[buffer].bs, pair)
-  end
-  if register.cr and not vim.tbl_contains(mode_pairs[buffer].cr, pair) then
-    table.insert(mode_pairs[buffer].cr, pair)
-  end
+	-- Register pair if it is not already registered
+	local register, pair = pair_info.register, pair_info.pair
+	if register.bs and not vim.tbl_contains(mode_pairs[buffer].bs, pair) then
+		table.insert(mode_pairs[buffer].bs, pair)
+	end
+	if register.cr and not vim.tbl_contains(mode_pairs[buffer].cr, pair) then
+		table.insert(mode_pairs[buffer].cr, pair)
+	end
 end
 
 H.unregister_pair = function(pair, mode, buffer)
-  local mode_pairs = H.registered_pairs[mode]
-  if not (mode_pairs and mode_pairs[buffer]) then return end
+	local mode_pairs = H.registered_pairs[mode]
+	if not (mode_pairs and mode_pairs[buffer]) then
+		return
+	end
 
-  local buf_pairs = mode_pairs[buffer]
-  for _, key in ipairs({ 'bs', 'cr' }) do
-    for i, p in ipairs(buf_pairs[key]) do
-      if p == pair then table.remove(buf_pairs[key], i) end
-    end
-  end
+	local buf_pairs = mode_pairs[buffer]
+	for _, key in ipairs({ "bs", "cr" }) do
+		for i, p in ipairs(buf_pairs[key]) do
+			if p == pair then
+				table.remove(buf_pairs[key], i)
+			end
+		end
+	end
 end
 
 H.is_pair_registered = function(pair, mode, buffer, key)
-  local mode_pairs = H.registered_pairs[mode]
-  if not mode_pairs then return false end
+	local mode_pairs = H.registered_pairs[mode]
+	if not mode_pairs then
+		return false
+	end
 
-  if vim.tbl_contains(mode_pairs['all'][key], pair) then return true end
+	if vim.tbl_contains(mode_pairs["all"][key], pair) then
+		return true
+	end
 
-  buffer = buffer == 0 and vim.api.nvim_get_current_buf() or buffer
-  local buf_pairs = mode_pairs[buffer]
-  if not buf_pairs then return false end
+	buffer = buffer == 0 and vim.api.nvim_get_current_buf() or buffer
+	local buf_pairs = mode_pairs[buffer]
+	if not buf_pairs then
+		return false
+	end
 
-  return vim.tbl_contains(buf_pairs[key], pair)
+	return vim.tbl_contains(buf_pairs[key], pair)
 end
 
 H.ensure_cr_bs = function(mode)
-  local has_any_cr_pair, has_any_bs_pair = false, false
-  for _, pair_tbl in pairs(H.registered_pairs[mode]) do
-    has_any_cr_pair = has_any_cr_pair or not vim.tbl_isempty(pair_tbl.cr)
-    has_any_bs_pair = has_any_bs_pair or not vim.tbl_isempty(pair_tbl.bs)
-  end
+	local has_any_cr_pair, has_any_bs_pair = false, false
+	for _, pair_tbl in pairs(H.registered_pairs[mode]) do
+		has_any_cr_pair = has_any_cr_pair or not vim.tbl_isempty(pair_tbl.cr)
+		has_any_bs_pair = has_any_bs_pair or not vim.tbl_isempty(pair_tbl.bs)
+	end
 
-  -- NOTE: this doesn't distinguish between global and buffer mappings. Both
-  -- `<BS>` and `<CR>` should work as normal even if no pairs are registered
-  if has_any_bs_pair then
-    -- Use not `silent` in Command mode to make it redraw
-    local opts = { silent = mode ~= 'c', expr = true, replace_keycodes = false, desc = 'MiniPairs <BS>' }
-    H.map(mode, '<BS>', 'v:lua.MiniPairs.bs()', opts)
-  end
-  if mode == 'i' and has_any_cr_pair then
-    local opts = { expr = true, replace_keycodes = false, desc = 'MiniPairs <CR>' }
-    H.map(mode, '<CR>', 'v:lua.MiniPairs.cr()', opts)
-  end
+	-- NOTE: this doesn't distinguish between global and buffer mappings. Both
+	-- `<BS>` and `<CR>` should work as normal even if no pairs are registered
+	if has_any_bs_pair then
+		-- Use not `silent` in Command mode to make it redraw
+		local opts = { silent = mode ~= "c", expr = true, replace_keycodes = false, desc = "MiniPairs <BS>" }
+		H.map(mode, "<BS>", "v:lua.MiniPairs.bs()", opts)
+	end
+	if mode == "i" and has_any_cr_pair then
+		local opts = { expr = true, replace_keycodes = false, desc = "MiniPairs <CR>" }
+		H.map(mode, "<CR>", "v:lua.MiniPairs.cr()", opts)
+	end
 end
 
 -- Work with pair_info --------------------------------------------------------
 H.validate_pair_info = function(pair_info, prefix)
-  prefix = prefix or 'pair_info'
-  vim.validate({ [prefix] = { pair_info, 'table' } })
-  pair_info = vim.tbl_deep_extend('force', H.default_pair_info, pair_info)
+	prefix = prefix or "pair_info"
+	vim.validate({ [prefix] = { pair_info, "table" } })
+	pair_info = vim.tbl_deep_extend("force", H.default_pair_info, pair_info)
 
-  vim.validate({
-    [prefix .. '.action'] = { pair_info.action, 'string' },
-    [prefix .. '.pair'] = { pair_info.pair, 'string' },
-    [prefix .. '.neigh_pattern'] = { pair_info.neigh_pattern, 'string' },
-    [prefix .. '.register'] = { pair_info.register, 'table' },
-  })
+	vim.validate({
+		[prefix .. ".action"] = { pair_info.action, "string" },
+		[prefix .. ".pair"] = { pair_info.pair, "string" },
+		[prefix .. ".neigh_pattern"] = { pair_info.neigh_pattern, "string" },
+		[prefix .. ".register"] = { pair_info.register, "table" },
+	})
 
-  vim.validate({
-    [prefix .. '.register.bs'] = { pair_info.register.bs, 'boolean' },
-    [prefix .. '.register.cr'] = { pair_info.register.cr, 'boolean' },
-  })
+	vim.validate({
+		[prefix .. ".register.bs"] = { pair_info.register.bs, "boolean" },
+		[prefix .. ".register.cr"] = { pair_info.register.cr, "boolean" },
+	})
 
-  return pair_info
+	return pair_info
 end
 
 H.pair_info_to_map_rhs = function(pair_info)
-  return ('v:lua.MiniPairs.%s(%s, %s)'):format(
-    pair_info.action,
-    vim.inspect(pair_info.pair),
-    vim.inspect(pair_info.neigh_pattern)
-  )
+	return ("v:lua.MiniPairs.%s(%s, %s)"):format(
+		pair_info.action,
+		vim.inspect(pair_info.pair),
+		vim.inspect(pair_info.neigh_pattern)
+	)
 end
 
 H.infer_mapping_description = function(pair_info)
-  local action_name = pair_info.action:sub(1, 1):upper() .. pair_info.action:sub(2)
-  return ('%s action for %s pair'):format(action_name, vim.inspect(pair_info.pair))
+	local action_name = pair_info.action:sub(1, 1):upper() .. pair_info.action:sub(2)
+	return ("%s action for %s pair"):format(action_name, vim.inspect(pair_info.pair))
 end
 
 -- Utilities ------------------------------------------------------------------
 H.get_cursor_neigh = function(start, finish)
-  local line, col
-  if vim.fn.mode() == 'c' then
-    line = vim.fn.getcmdline()
-    col = vim.fn.getcmdpos()
-    -- Adjust start and finish because output of `getcmdpos()` starts counting
-    -- columns from 1
-    start = start - 1
-    finish = finish - 1
-  else
-    line = vim.api.nvim_get_current_line()
-    col = vim.api.nvim_win_get_cursor(0)[2]
-  end
+	local line, col
+	if vim.fn.mode() == "c" then
+		line = vim.fn.getcmdline()
+		col = vim.fn.getcmdpos()
+		-- Adjust start and finish because output of `getcmdpos()` starts counting
+		-- columns from 1
+		start = start - 1
+		finish = finish - 1
+	else
+		line = vim.api.nvim_get_current_line()
+		col = vim.api.nvim_win_get_cursor(0)[2]
+	end
 
-  -- Add '\r' and '\n' to always return 2 characters
-  return string.sub(('%s%s%s'):format('\r', line, '\n'), col + 1 + start, col + 1 + finish)
+	-- Add '\r' and '\n' to always return 2 characters
+	return string.sub(("%s%s%s"):format("\r", line, "\n"), col + 1 + start, col + 1 + finish)
 end
 
-H.neigh_match = function(pattern) return (pattern == nil) or (H.get_cursor_neigh(0, 1):find(pattern) ~= nil) end
+H.neigh_match = function(pattern)
+	return (pattern == nil) or (H.get_cursor_neigh(0, 1):find(pattern) ~= nil)
+end
 
 H.get_arrow_key = function(key)
-  if vim.fn.mode() == 'i' then
-    -- Using left/right keys in insert mode breaks undo sequence and, more
-    -- importantly, dot-repeat. To avoid this, use 'i_CTRL-G_U' mapping.
-    return H.keys.keep_undo .. H.keys[key]
-  else
-    return H.keys[key]
-  end
+	if vim.fn.mode() == "i" then
+		-- Using left/right keys in insert mode breaks undo sequence and, more
+		-- importantly, dot-repeat. To avoid this, use 'i_CTRL-G_U' mapping.
+		return H.keys.keep_undo .. H.keys[key]
+	else
+		return H.keys[key]
+	end
 end
 
 H.map = function(mode, lhs, rhs, opts)
-  if lhs == '' then return end
-  opts = vim.tbl_deep_extend('force', { silent = true }, opts or {})
-  vim.keymap.set(mode, lhs, rhs, opts)
+	if lhs == "" then
+		return
+	end
+	opts = vim.tbl_deep_extend("force", { silent = true }, opts or {})
+	vim.keymap.set(mode, lhs, rhs, opts)
 end
 
 return MiniPairs
